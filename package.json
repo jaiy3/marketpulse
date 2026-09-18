@@ -1,0 +1,52 @@
+{
+  "name": "marketpulse-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Real-time market data API built with Node.js, TypeScript, Express, PostgreSQL, Prisma, Redis, WebSockets, BullMQ and Docker.",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "dev:worker": "tsx watch src/workers/market.worker.ts",
+    "build": "prisma generate && tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "worker": "node dist/workers/market.worker.js",
+    "lint": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.16.3",
+    "bcryptjs": "^3.0.2",
+    "bullmq": "^5.58.5",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.7.0",
+    "jsonwebtoken": "^9.0.2",
+    "pino": "^9.10.0",
+    "pino-http": "^10.5.0",
+    "prom-client": "^15.1.3",
+    "swagger-ui-express": "^5.0.1",
+    "ws": "^8.18.3",
+    "zod": "^4.1.8"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.5.2",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/supertest": "^6.0.3",
+    "@types/ws": "^8.18.1",
+    "prisma": "^6.16.3",
+    "supertest": "^7.1.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

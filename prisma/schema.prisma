@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PriceTick {
+  id        BigInt   @id @default(autoincrement())
+  symbol    String
+  price     Decimal  @db.Decimal(30, 10)
+  quantity  Decimal? @db.Decimal(30, 10)
+  eventTime DateTime
+  createdAt DateTime @default(now())
+
+  @@index([symbol, eventTime(sort: Desc)])
+  @@index([eventTime])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
