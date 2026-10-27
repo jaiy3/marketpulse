@@ -39,7 +39,8 @@ app.use((req, res, next) => {
 });
 
 // Live dashboard (static) at "/".
-app.use(express.static(path.join(__dirname, "..", "public"), { maxAge: "1h" }));
+// No long-lived caching: browsers revalidate with ETags, so a deploy is visible immediately.
+app.use(express.static(path.join(__dirname, "..", "public"), { maxAge: 0 }));
 
 app.get("/api", (_req, res) =>
   res.json({
