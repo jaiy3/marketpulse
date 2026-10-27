@@ -68,7 +68,7 @@ npm test        # Vitest + Supertest
 npm run lint    # tsc --noEmit
 ```
 
-Tests cover stream parsing and validation, idempotent job IDs, reconnect backoff, request validation, auth protection, the WebSocket subscription contract and the HTTP surface. CI runs lint, tests and the build on every push against real PostgreSQL and Redis service containers.
+Tests cover stream parsing and validation, idempotent job IDs, reconnect backoff, request validation, auth protection, the WebSocket subscription contract and the HTTP surface. GitHub Actions runs type-checking, tests and the production build on every push.
 
 ## Deploy (Render, free tier)
 
