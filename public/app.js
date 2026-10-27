@@ -123,6 +123,22 @@
     }
   }
 
+  // Quiet pairs may not have traded in the last 30s (the cache TTL). Show their last
+  // stored trade, clearly timestamped, instead of an empty card.
+  async function fillFromHistory() {
+    await Promise.all(
+      SYMBOLS.filter((s) => state[s.id].last === null).map(async (s) => {
+        try {
+          const res = await fetch(`/api/market/history?symbol=${s.id}&limit=1`);
+          const item = (await res.json()).data?.items?.[0];
+          if (item && state[s.id].last === null) {
+            applyTick({ symbol: s.id, price: item.price, quantity: item.quantity, eventTime: Date.parse(item.eventTime) }, { live: false });
+          }
+        } catch { /* leave the card waiting */ }
+      })
+    );
+  }
+
   function connect() {
     setLive("connecting");
     const proto = location.protocol === "https:" ? "wss" : "ws";
@@ -138,6 +154,7 @@
       if (msg.type === "subscribed") {
         setLive("live");
         (msg.snapshot || []).forEach((t) => applyTick(t, { live: false }));
+        void fillFromHistory();
         return;
       }
       if (msg.type === "connected" || msg.type === "error") return;
