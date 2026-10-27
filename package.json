@@ -1,6 +1,6 @@
 {
   "name": "marketpulse-api",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Real-time market data API built with Node.js, TypeScript, Express, PostgreSQL, Prisma, Redis, WebSockets, BullMQ and Docker.",
   "scripts": {
@@ -15,7 +15,9 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "start:prod": "prisma migrate deploy && node dist/server.js",
+    "loadtest": "npx autocannon -c 50 -d 20 \"http://localhost:4000/api/market/latest?symbols=BTCUSDT,ETHUSDT\""
   },
   "dependencies": {
     "@prisma/client": "^6.16.3",
@@ -40,13 +42,16 @@
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.5.2",
-    "@types/swagger-ui-express": "^4.1.8",
     "@types/supertest": "^6.0.3",
+    "@types/swagger-ui-express": "^4.1.8",
     "@types/ws": "^8.18.1",
     "prisma": "^6.16.3",
     "supertest": "^7.1.4",
     "tsx": "^4.19.2",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

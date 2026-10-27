@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MarketPulse · Live market data API</title>
+  <meta name="description" content="Real-time crypto market data API: Binance trades streamed through Redis and WebSockets, persisted to PostgreSQL via BullMQ. Built by Jaiye Adeboye." />
+  <meta property="og:title" content="MarketPulse · Live market data API" />
+  <meta property="og:description" content="Live trades streamed over WebSockets, cached in Redis, persisted to PostgreSQL. Node.js + TypeScript." />
+  <meta property="og:image" content="/architecture.png" />
+  <meta name="theme-color" content="#0b0e14" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-inner">
+      <a class="brand" href="/">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 13h4l3-8 4 15 3-9 2 2h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        MarketPulse
+      </a>
+      <nav class="links">
+        <a href="/docs">API docs</a>
+        <a href="https://github.com/jaiy3/marketpulse" target="_blank" rel="noopener">GitHub</a>
+        <a href="#architecture">Architecture</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="intro">
+      <p class="eyebrow"><span class="dot" id="live-dot"></span><span id="live-label">Connecting…</span></p>
+      <h1>Live crypto prices, streamed from Binance through Redis and WebSockets.</h1>
+      <p class="lede">Everything on this page is arriving over MarketPulse's own public API as you watch. Trades are validated, cached in Redis, pushed to subscribers through pub/sub and written to PostgreSQL by a background queue.</p>
+    </section>
+
+    <section class="status" aria-label="System status">
+      <div class="stat"><span class="k">WebSocket</span><span class="v" id="s-ws">—</span></div>
+      <div class="stat"><span class="k">Trades received</span><span class="v mono" id="s-count">0</span></div>
+      <div class="stat"><span class="k">Trades / sec</span><span class="v mono" id="s-rate">0</span></div>
+      <div class="stat"><span class="k">PostgreSQL</span><span class="v" id="s-db">—</span></div>
+      <div class="stat"><span class="k">Redis</span><span class="v" id="s-redis">—</span></div>
+    </section>
+
+    <section class="grid" id="cards" aria-label="Live prices"></section>
+
+    <section class="panels">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Live trades</h2>
+          <span class="hint">WebSocket <code>/ws</code></span>
+        </div>
+        <ol class="feed mono" id="feed"><li class="empty">Waiting for the first trade…</li></ol>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Stored history</h2>
+          <div class="tabs" id="history-tabs" role="tablist"></div>
+        </div>
+        <table class="history mono">
+          <thead><tr><th>Time (UTC)</th><th class="r">Price</th><th class="r">Qty</th></tr></thead>
+          <tbody id="history"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody>
+        </table>
+        <p class="foot" id="history-meta">REST <code>/api/market/history</code> · PostgreSQL</p>
+      </div>
+    </section>
+
+    <section class="panel try">
+      <div class="panel-head"><h2>Try the API</h2><a class="hint" href="/docs">Full OpenAPI docs →</a></div>
+      <div class="cmd"><code id="c1"></code><button data-copy="c1">Copy</button></div>
+      <div class="cmd"><code id="c2"></code><button data-copy="c2">Copy</button></div>
+      <div class="cmd"><code id="c3"></code><button data-copy="c3">Copy</button></div>
+    </section>
+
+    <section class="panel" id="architecture">
+      <div class="panel-head"><h2>How it works</h2></div>
+      <img class="arch" src="/architecture.svg" alt="MarketPulse architecture: Binance stream into the ingestion worker, which writes to Redis cache, Redis pub/sub and a BullMQ queue; the queue persists to PostgreSQL; API instances push pub/sub messages to WebSocket clients and serve REST from Redis and PostgreSQL." />
+      <ol class="steps">
+        <li><b>Ingest.</b> A worker holds a WebSocket to Binance and validates every trade with Zod. Bad messages are dropped, and the connection reconnects with exponential backoff.</li>
+        <li><b>Cache and fan out.</b> Each trade becomes the latest price in Redis (30-second expiry, so stale prices disappear) and is published on Redis pub/sub, so any number of API instances can push it to their WebSocket clients.</li>
+        <li><b>Persist off the hot path.</b> Writes go through a BullMQ queue with retries. Job IDs are derived from symbol and second, so duplicates and replays never create extra rows.</li>
+        <li><b>Serve.</b> REST reads come from Redis (latest) or an indexed PostgreSQL query (history). Rate limiting, JWT auth, Prometheus metrics and health checks are built in.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <span>Built by <a href="https://jaiyeadeboye-portfolio.vercel.app" target="_blank" rel="noopener">Jaiye Adeboye</a> · Node.js, TypeScript, Express, PostgreSQL, Redis, BullMQ</span>
+    <span class="mono" id="build">v1.1.0</span>
+  </footer>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

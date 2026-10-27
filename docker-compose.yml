@@ -27,13 +27,13 @@ services:
 
   api:
     build: .
-    command: npm run start
+    command: npm run start:prod
     environment:
       NODE_ENV: production
       PORT: 4000
       DATABASE_URL: postgresql://marketpulse:marketpulse@postgres:5432/marketpulse?schema=public
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: change-me-in-production
+      JWT_SECRET: change-me-in-production-at-least-32-chars
       CORS_ORIGIN: http://localhost:5173
     ports:
       - "4000:4000"
@@ -50,7 +50,8 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgresql://marketpulse:marketpulse@postgres:5432/marketpulse?schema=public
       REDIS_URL: redis://redis:6379
-      BINANCE_WS_URL: wss://stream.binance.com:9443/stream?streams=btcusdt@trade/ethusdt@trade/solusdt@trade
+      BINANCE_WS_URL: wss://data-stream.binance.vision/stream?streams=btcusdt@trade/ethusdt@trade/solusdt@trade/bnbusdt@trade
+      JWT_SECRET: change-me-in-production-at-least-32-chars
     depends_on:
       postgres:
         condition: service_healthy

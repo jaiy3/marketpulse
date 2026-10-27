@@ -1,27 +1,23 @@
 import { prisma } from "../config/prisma";
 import { redis } from "../config/redis";
+import type { MarketTick } from "../ingestion/binance";
 
-export type MarketTick = {
-  symbol: string;
-  price: string;
-  quantity: string;
-  eventTime: number;
-  source: "binance";
-};
+export type { MarketTick };
 
 const key = (symbol: string) => `market:latest:${symbol}`;
 
 export async function getLatest(symbols: string[]) {
-  const values = await Promise.all(symbols.map((symbol) => redis.get(key(symbol))));
+  if (symbols.length === 0) return [];
+  const values = await redis.mget(...symbols.map(key));
   return values.flatMap((value, index) => {
     if (!value) return [];
-    return [{ ...JSON.parse(value) as MarketTick, symbol: symbols[index] }];
+    return [{ ...(JSON.parse(value) as MarketTick), symbol: symbols[index] }];
   });
 }
 
 export async function getHistory(symbol: string, page: number, limit: number) {
   const skip = (page - 1) * limit;
-  const [items, total] = await Promise.all([
+  const [items, total] = await prisma.$transaction([
     prisma.priceTick.findMany({
       where: { symbol },
       orderBy: { eventTime: "desc" },
